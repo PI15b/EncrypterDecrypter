@@ -13,13 +13,9 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        Encrypter.cpp \
-    mainwindow.cpp \
-    Rijndael/Rijndael.cpp
+        Encrypter.cpp
 
-HEADERS  += Encrypter.h \
-    mainwindow.h \
-    Rijndael/Rijndael.h
+HEADERS  += Encrypter.h
 
 FORMS    += Encrypter.ui
 
