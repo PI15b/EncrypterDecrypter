@@ -1,5 +1,6 @@
 #include "Rijndael.h"
 #include <assert.h>
+#include <cstring>
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
