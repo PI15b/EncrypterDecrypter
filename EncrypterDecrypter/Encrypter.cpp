@@ -1,9 +1,7 @@
 #include "Encrypter.h"
-#include <fstream>
 #include "ui_Encrypter.h"
 #include "QFileDialog"
 #include "QMessageBox"
-#include "Rijndael/Rijndael.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,15 +11,29 @@ MainWindow::MainWindow(QWidget *parent) :
   //  ui->stackedWidget->setStyleSheet("border: 1px solid red");
    /* ui->ED_file->setIcon(QIcon(QPixmap("D:/programs/qt/proj/Encypter/icons/icons/button.png")));
     ui->ED_file->setIconSize(QSize(264, 32)); */
-    QPixmap pixmap(QDir::currentPath() + "/icons/button.png");
-       QIcon ButtonIcon(pixmap);
-       ui->ED_file->setIcon(ButtonIcon);
-       ui->ED_file->setIconSize(pixmap.rect().size());
-       ui->ED_Message->setIcon(ButtonIcon);
-       ui->ED_Message->setIconSize(pixmap.rect().size());
-    ui->centralWidget->setStyleSheet("background-color: #DCDCDC;");
+    ui->centralWidget->setStyleSheet("background-color:  #242a45;");
+    ui->frame->setStyleSheet("background-color:  #DCDCDC;");
+    ui->stackedWidget->setStyleSheet("background-color:  #DCDCDC;");
+    QPixmap pixmap(QDir::currentPath() + "/icons/ED_file.png");
+    QIcon ButtonIcon(pixmap);
+    ui->ED_file->setIcon(ButtonIcon);
+    ui->ED_file->setIconSize(pixmap.rect().size());
     ui->ED_file->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap2(QDir::currentPath() + "/icons/ED_message.png");
+    QIcon ButtonIcon2(pixmap2);
+    ui->ED_Message->setIcon(ButtonIcon2);
+    ui->ED_Message->setIconSize(pixmap.rect().size());
     ui->ED_Message->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap3(QDir::currentPath() + "/icons/Settings.png");
+    QIcon ButtonIcon3(pixmap3);
+    ui->settings_button->setIcon(ButtonIcon3);
+    ui->settings_button->setIconSize(pixmap.rect().size());
+    ui->settings_button->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap4(QDir::currentPath() + "/icons/About.png");
+    QIcon  ButtonIcon4(pixmap4);
+    ui->about_button->setIcon(ButtonIcon4);
+    ui->about_button->setIconSize(pixmap.rect().size());
+    ui->about_button->setStyleSheet("QPushButton{border: none;outline: none;}");
 }
 
 MainWindow::~MainWindow()
@@ -51,19 +63,6 @@ void MainWindow::on_about_button_clicked()
     ui->stackedWidget->setCurrentIndex(3);
 }
 
-static unsigned char * ReadBytesFromFile(const QString &filename, size_t &fsize)
-{
-    std::fstream f(filename.toStdString().c_str(), std::ios::in | std::ios::binary);
-    if(!f.is_open())
-        exit(EXIT_FAILURE);
-    f.seekg(0, std::ios_base::end);
-    fsize = f.tellg();
-    f.seekg(0, std::ios_base::beg);
-    unsigned char *file = new unsigned char[fsize];
-    f.read((char*)file, fsize);
-    return file;
-}
-
 
 void MainWindow::on_pushButton_clicked()
 {
@@ -71,18 +70,29 @@ void MainWindow::on_pushButton_clicked()
 
     if(browse_win.exec())
     {
-        QStringList file_selected = browse_win.selectedFiles();
-        ui->lineEdit->setText(file_selected[0]);
-        size_t fsize;
-        unsigned char *file = ReadBytesFromFile(file_selected[0], fsize);
-        size_t key_size;
-        unsigned char *cipher_key = ReadBytesFromFile("3511F41EA5DFC1DF2CD521F7B6A5F", key_size);
-        unsigned char *encrypted = new unsigned char[fsize];
-        Rijndael rj;
-        rj.SetParameters(256);
-        rj.StartEncryption(cipher_key);
-        rj.Encrypt(file, encrypted, fsize / 16);
-        QMessageBox msgBox;
-        msgBox.setText(*(new QString((char*)encrypted)));
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->lineEdit->setText(file_selected[0]);
+    }
+}
+
+void MainWindow::on_SaveDir_button_clicked()
+{
+    QFileDialog browse_win;
+
+    if(browse_win.exec())
+    {
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->SaveDir_line->setText(file_selected[0]);
+    }
+}
+
+void MainWindow::on_Icon_button_clicked()
+{
+    QFileDialog browse_win;
+
+    if(browse_win.exec())
+    {
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->Icon_line->setText(file_selected[0]);
     }
 }
