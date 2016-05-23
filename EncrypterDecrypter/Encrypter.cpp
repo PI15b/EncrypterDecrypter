@@ -1,9 +1,12 @@
 #include "Encrypter.h"
 #include <fstream>
+#include <cstring>
 #include "ui_Encrypter.h"
 #include "QFileDialog"
 #include "QMessageBox"
 #include "Rijndael/Rijndael.h"
+#include "Rijndael/aes.h"
+#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -59,9 +62,17 @@ static unsigned char * ReadBytesFromFile(const QString &filename, size_t &fsize)
     f.seekg(0, std::ios_base::end);
     fsize = f.tellg();
     f.seekg(0, std::ios_base::beg);
-    unsigned char *file = new unsigned char[fsize];
+    uint8_t *file = new uint8_t[fsize];
     f.read((char*)file, fsize);
     return file;
+}
+
+void SaveBytesToFile(const QString &filename, const uint8_t *bytes, size_t size)
+{
+    std::fstream f(filename.toStdString().c_str(), std::ios::out | std::ios::binary);
+    if(!f.is_open())
+        exit(EXIT_FAILURE);
+    f.write((char*)bytes, size);
 }
 
 
@@ -74,15 +85,19 @@ void MainWindow::on_pushButton_clicked()
         QStringList file_selected = browse_win.selectedFiles();
         ui->lineEdit->setText(file_selected[0]);
         size_t fsize;
-        unsigned char *file = ReadBytesFromFile(file_selected[0], fsize);
-        size_t key_size;
-        unsigned char *cipher_key = ReadBytesFromFile("3511F41EA5DFC1DF2CD521F7B6A5F", key_size);
-        unsigned char *encrypted = new unsigned char[fsize];
-        Rijndael rj;
-        rj.SetParameters(256);
-        rj.StartEncryption(cipher_key);
-        rj.Encrypt(file, encrypted, fsize / 16);
-        QMessageBox msgBox;
-        msgBox.setText(*(new QString((char*)encrypted)));
+        uint8_t *file = ReadBytesFromFile(file_selected[0], fsize);
+        size_t key_size = 256;
+        uint8_t *cipher_key = new uint8_t[key_size / 8];
+        for(size_t i = 0; i < key_size / 8; ++i)
+            cipher_key[i] = (rand() & 0xff ^ rand() & 0xFF) << rand() % 7;
+        Aes aes;
+        /*uint8_t *input = new uint8_t[16];
+        uint8_t input_temp[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
+        for(size_t i = 0; i < 16; ++i)
+            input[i] = input_temp[i];
+        uint8_t key[16] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};*/
+        uint8_t * cipher_text = aes.encrypt(file, fsize, cipher_key, key_size);
+        uint8_t * plain_text = aes.decrypt(cipher_text, (fsize - fsize % (16)) + 16, cipher_key, key_size);
+        SaveBytesToFile(file_selected[0], plain_text, fsize);
     }
 }
