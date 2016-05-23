@@ -23,16 +23,16 @@ bool tablesInitialized = false;
 // constants defining the algorithm
 int const gf2_8_poly = 0x11B; // the poly defining the 256 element field
 // poly defining mixing, coeffs usually '03010102'
-const unsigned long poly32 = 0x03010102;
+const uint32_t poly32 = 0x03010102;
 // poly inverse, coeffs usually '0B0D090E'
-const unsigned long poly32_inv = 0x0B0D090E;
+const uint32_t poly32_inv = 0x0B0D090E;
 
 int const parameters[] = { // data in  Nr,C1,C2,C3 form
 //Nk*32 128         192         256
     10,1,2,3, 	12,1,2,3,  	14,1,2,3,   // Nb*32 = 128
     12,1,2,3, 	12,1,2,3,  	14,1,2,3,   // Nb*32 = 192
     14,1,3,4, 	14,1,3,4,  	14,1,3,4,   // Nb*32 = 256
-    };
+};
 
 // tables for inverses, byte sub
 unsigned char gf2_8_inv[256] = {
@@ -52,7 +52,7 @@ unsigned char gf2_8_inv[256] = {
     0x7a,0x07,0xae,0x63,0xc5,0xdb,0xe2,0xea,0x94,0x8b,0xc4,0xd5,0x9d,0xf8,0x90,0x6b,
     0xb1,0x0d,0xd6,0xeb,0xc6,0x0e,0xcf,0xad,0x08,0x4e,0xd7,0xe3,0x5d,0x50,0x1e,0xb3,
     0x5b,0x23,0x38,0x34,0x68,0x46,0x03,0x8c,0xdd,0x9c,0x7d,0xa0,0xcd,0x1a,0x41,0x1c,
-    };
+};
 
 unsigned char byte_sub[256]= {
     0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,
@@ -94,7 +94,7 @@ unsigned char inv_byte_sub[256]= {
 
 
 // this table needs Nb*(Nr+1)/Nk entries - up to 8*(15)/4 = 60
-unsigned long Rcon[60] = { // todo -  this table may be stored as bytes or made on the fly
+uint32_t Rcon[60] = { // todo -  this table may be stored as bytes or made on the fly
     0x00000000,0x00000001,0x00000002,0x00000004,0x00000008,0x00000010,0x00000020,0x00000040,
     0x00000080,0x0000001b,0x00000036,0x0000006c,0x000000d8,0x000000ab,0x0000004d,0x0000009a,
     0x0000002f,0x0000005e,0x000000bc,0x00000063,0x000000c6,0x00000097,0x00000035,0x0000006a,
@@ -103,7 +103,7 @@ unsigned long Rcon[60] = { // todo -  this table may be stored as bytes or made 
     0x0000004a,0x00000094,0x00000033,0x00000066,0x000000cc,0x00000083,0x0000001d,0x0000003a,
     0x00000074,0x000000e8,0x000000cb,0x0000008d,0x00000001,0x00000002,0x00000004,0x00000008,
     0x00000010,0x00000020,0x00000040,0x0000001b,
-    };
+};
 
 
 // mult 2 elements using gf2_8_poly as a reduction
@@ -141,7 +141,7 @@ bool CheckInverses(bool create)
     assert(GF2_8_mult(0xFF,0x55) == 0xF8);
 
 
-    unsigned int a,b; // need int here to prevent wraps in loop
+    uint32_t a,b; // need int here to prevent wraps in loop
     if (create == true)
         const_cast<unsigned char*>(gf2_8_inv)[0] = 0;
     else if (gf2_8_inv[0] != 0)
@@ -172,7 +172,7 @@ bool CheckByteSub(bool create)
     if (CheckInverses(create) == false)
         return false; // we cannot do this without inverses
 
-    unsigned int x,y; // need ints here to prevent wrap in loop
+    uint32_t x,y; // need ints here to prevent wrap in loop
     for (x = 0; x <= 255; x++)
         {
         y = gf2_8_inv[x]; // inverse to start with
@@ -196,7 +196,7 @@ bool CheckInvByteSub(bool create)
     if (CheckByteSub(create) == false)
         return false; // we cannot do this without byte_sub
 
-    unsigned int x,y; // need ints here to prevent wrap in loop
+    uint32_t x,y; // need ints here to prevent wrap in loop
     for (x = 0; x <= 255; x++)
         {
         // we brute force it...
@@ -220,7 +220,7 @@ bool CheckRcon(bool create)
         Rcon[0] = 0;
     else if (Rcon[0] != 0)
         return false; // todo - this is unused still check?
-    for (int i = 1; i < sizeof(Rcon)/sizeof(Rcon[0])-1; i++)
+    for (uint32_t i = 1; i < sizeof(Rcon)/sizeof(Rcon[0])-1; i++)
         {
         if (create == true)
             Rcon[i] = Ri;
@@ -394,14 +394,14 @@ void Rijndael::InvFinalRound(int round)
     InvByteSub();
     } // FinalRound
 
-unsigned long Rijndael::RotByte(unsigned long data)
+uint32_t Rijndael::RotByte(uint32_t data)
     { // bytes (a,b,c,d) -> (b,c,d,a)	so low becomes high
     return (data << 24) | (data >> 8);
     // todo inline with rotr
 
     } // RotByte
 
-unsigned long Rijndael::SubByte(unsigned long data)
+uint32_t Rijndael::SubByte(uint32_t data)
     { // does the SBox on this 4 byte data
     unsigned result = 0;
     result = byte_sub[data>>24];
@@ -419,7 +419,7 @@ void Rijndael::KeyExpansion(const unsigned char * key)
     {
     assert(Nk > 0);
     int i;
-    unsigned long temp, * Wb = reinterpret_cast<unsigned long*>(W); // todo not portable - Endian problems
+    uint32_t temp, * Wb = reinterpret_cast<uint32_t*>(W); // todo not portable - Endian problems
     if (Nk <= 6)
         {
         // todo - memcpy
@@ -482,14 +482,14 @@ void DumpCharTable(ostream & out, const char * name, const unsigned char * table
         out << "0x";
         if (table[pos] < 16)
             out << '0';
-        out << static_cast<unsigned int>(table[pos]) << ',';
+        out << static_cast<uint32_t>(table[pos]) << ',';
         if ((pos %16) == 15)
             out << endl;
         }
     out << dec;
     } // DumpCharTable
 
-void DumpLongTable(ostream & out, const char * name, const unsigned long * table, int length)
+void DumpLongTable(ostream & out, const char * name, const uint32_t * table, int length)
     { // dump te contents of a table to a file
     int pos;
     out << name << endl << hex;
@@ -510,7 +510,7 @@ void DumpLongTable(ostream & out, const char * name, const unsigned long * table
             out << '0';
         if (table[pos] < 16*16*16*16*16*16*16)
             out << '0';
-        out << static_cast<unsigned int>(table[pos]) << ',';
+        out << static_cast<uint32_t>(table[pos]) << ',';
         if ((pos % 8) == 7)
             out << endl;
         }
@@ -563,7 +563,7 @@ void DumpHex(const unsigned char * table, int length)
         {
         if (table[pos] < 16)
             cerr << '0';
-        cerr << static_cast<unsigned int>(table[pos]) << ' ';
+        cerr << static_cast<uint32_t>(table[pos]) << ' ';
         if ((pos %16) == 15)
             cerr << endl;
         }
@@ -572,8 +572,8 @@ void DumpHex(const unsigned char * table, int length)
 
 void Rijndael::EncryptBlock(const unsigned char * datain1, unsigned char * dataout1, const unsigned char * states)
     { // todo ? allow in place encryption
-    const unsigned long * datain = reinterpret_cast<const unsigned long*>(datain1);
-    unsigned long * dataout = reinterpret_cast<unsigned long*>(dataout1);
+    const uint32_t * datain = reinterpret_cast<const uint32_t*>(datain1);
+    uint32_t * dataout = reinterpret_cast<uint32_t*>(dataout1);
 
     memcpy(state,datain,state_size);
     AddRoundKey(0);
@@ -595,11 +595,11 @@ void Rijndael::EncryptBlock(const unsigned char * datain1, unsigned char * datao
     } // Encrypt
 
 // call this to encrypt any size block
-void Rijndael::Encrypt(const unsigned char * datain, unsigned char * dataout, unsigned long numBlocks, BlockMode mode)
+void Rijndael::Encrypt(const unsigned char * datain, unsigned char * dataout, uint32_t numBlocks, BlockMode mode)
     {
     if (0 == numBlocks)
         return;
-    unsigned int blocksize = Nb*4;
+    uint32_t blocksize = Nb*4;
     switch (mode)
         {
         case ECB :
@@ -617,7 +617,7 @@ void Rijndael::Encrypt(const unsigned char * datain, unsigned char * dataout, un
             memset(buffer,0,sizeof(buffer)); // clear out - todo - allow setting the Initialization Vector - needed for security
             while (numBlocks)
                 {
-                for (unsigned int pos = 0; pos < blocksize; ++pos)
+                for (uint32_t pos = 0; pos < blocksize; ++pos)
                     buffer[pos] ^= *datain++;
                 EncryptBlock(buffer,dataout);
                 memcpy(buffer,dataout,blocksize);
@@ -639,8 +639,8 @@ void Rijndael::StartDecryption(const unsigned char * key)
 
 void Rijndael::DecryptBlock(const unsigned char * datain1, unsigned char * dataout1, const unsigned char * states)
     {
-    const unsigned long * datain = reinterpret_cast<const unsigned long*>(datain1);
-    unsigned long * dataout = reinterpret_cast<unsigned long*>(dataout1);
+    const uint32_t * datain = reinterpret_cast<const uint32_t*>(datain1);
+    uint32_t * dataout = reinterpret_cast<uint32_t*>(dataout1);
 
     memcpy(state,datain,state_size);
     InvFinalRound(Nr);
@@ -662,11 +662,11 @@ void Rijndael::DecryptBlock(const unsigned char * datain1, unsigned char * datao
     } // Decrypt
 
 // call this to decrypt any size block
-void Rijndael::Decrypt(const unsigned char * datain, unsigned char * dataout, unsigned long numBlocks, BlockMode mode)
+void Rijndael::Decrypt(const unsigned char * datain, unsigned char * dataout, uint32_t numBlocks, BlockMode mode)
     {
     if (0 == numBlocks)
         return;
-    unsigned int blocksize = Nb*4;
+    uint32_t blocksize = Nb*4;
     switch (mode)
         {
         case ECB :
@@ -683,7 +683,7 @@ void Rijndael::Decrypt(const unsigned char * datain, unsigned char * dataout, un
             unsigned char buffer[64];
             memset(buffer,0,sizeof(buffer)); // clear out - todo - allow setting the Initialization Vector - needed for security
             DecryptBlock(datain,dataout); // do first block
-            for (unsigned int pos = 0; pos < blocksize; ++pos)
+            for (uint32_t pos = 0; pos < blocksize; ++pos)
                 *dataout++ ^= buffer[pos];
             datain += blocksize;
             numBlocks--;
@@ -691,7 +691,7 @@ void Rijndael::Decrypt(const unsigned char * datain, unsigned char * dataout, un
             while (numBlocks)
                 {
                 DecryptBlock(datain,dataout); // do first block
-                for (unsigned int pos = 0; pos < blocksize; ++pos)
+                for (uint32_t pos = 0; pos < blocksize; ++pos)
                     *dataout++ ^= *(datain-blocksize+pos);
                 datain  += blocksize;
                 --numBlocks;

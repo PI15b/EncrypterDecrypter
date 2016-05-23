@@ -1,5 +1,6 @@
 #ifndef RIJNDAEL_H
 #define RIJNDAEL_H
+#include <stdint.h>
 
 class Rijndael
 {
@@ -26,7 +27,7 @@ public:
     // have enough space in datain and dataout to accomodate this. Pad your data before
     // calling, preferably using the padding methods listed below.
     // Decryption must use the same mode as the encryption.
-    void Encrypt(const unsigned char * datain, unsigned char * dataout, unsigned long numBlocks, BlockMode mode = CBC);
+    void Encrypt(const unsigned char * datain, unsigned char * dataout, uint32_t numBlocks, BlockMode mode = CBC);
 
     // call this before any decryption with the key to use
     void StartDecryption(const unsigned char * key);
@@ -37,7 +38,7 @@ public:
     // calling, preferably using the padding methods listed below. You must know the desired
     // length of the output data, since all the blocks are returned decrypted.
     // Encryption must use the same mode as the decryption.
-    void Decrypt(const unsigned char * datain, unsigned char * dataout, unsigned long numBlocks, BlockMode mode = CBC);
+    void Decrypt(const unsigned char * datain, unsigned char * dataout, uint32_t numBlocks, BlockMode mode = CBC);
 
 
 private:
@@ -63,8 +64,8 @@ private:
     void InvMixColumn(void);
     void AddRoundKey(int round);
 
-    unsigned long RotByte(unsigned long data);
-    unsigned long SubByte(unsigned long data);
+    uint32_t RotByte(uint32_t data);
+    uint32_t SubByte(uint32_t data);
 
     // the round functions
     void Round(int round);
