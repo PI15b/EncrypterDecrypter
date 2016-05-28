@@ -14,6 +14,28 @@ public:
     enum mode{ECB, CBC, PCBC, CFB, OFB};
     enum {Nb = 4};
 private:
+    struct CryptException
+    {
+        CryptException(char err_str[]){ strcpy(this->err_str, err_str); }
+        char * what() { return err_str; }
+    private:
+        CryptException();
+    protected:
+        char *err_str;
+    };
+    struct KeyException: public CryptException
+    {
+        KeyException():CryptException("Key error"){}
+    };
+
+    struct PlainTextException: public CryptException
+    {
+        PlainTextException():CryptException("Plain text error"){}
+    };
+    struct CipherTextException: public CryptException
+    {
+        CipherTextException():CryptException("Cipher text error"){}
+    };
     size_t Nk, Nr;
     unsigned int curr_mode;
     uint8_t State[4*Nb];

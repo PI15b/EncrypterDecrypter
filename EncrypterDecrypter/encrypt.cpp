@@ -129,7 +129,7 @@ uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     for(size_t i = 0; i < hash_size; ++i)
         hash[i] ^= cipher_hash[i];
     if(memcmp(hash, key_hash, hash_size) != 0)
-        throw "Incorrect key";
+        throw new IncorrectKeyException;
     size_t plain_size;
     Aes aes(mode);
     uint8_t * plain_text = aes.decrypt(cipher_text, cipher_size, plain_size, cipher_key, key_size * 8);

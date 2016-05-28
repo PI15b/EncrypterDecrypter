@@ -11,6 +11,14 @@ uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
 //Decrypt procedure
 uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, const QString &cipher_dir, const QString &key_dir, const QString &hash_dir);
 
+class IncorrectKeyException
+{
+private:
+    char *err_str;
+public:
+    IncorrectKeyException(): err_str("Incorrect key") {}
+    char * what() { return err_str; }
+};
 
 #endif // ENCRYPT
 

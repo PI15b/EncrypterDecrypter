@@ -65,7 +65,7 @@ uint8_t * Aes::encrypt(uint8_t plain_text[], size_t plain_size, uint8_t key[], s
         if(key)
             KeyExpansion(key, key_size);
         else
-            throw "key_error";
+            throw new KeyException;
         plain_size = PadPlainText(plain_text, plain_size);
         switch(curr_mode)
         {
@@ -77,7 +77,7 @@ uint8_t * Aes::encrypt(uint8_t plain_text[], size_t plain_size, uint8_t key[], s
         }
     }
     else
-        throw "plain_text_error";
+        throw new PlainTextException;
 }
 
 uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size, uint8_t key[], size_t key_size)
@@ -87,7 +87,7 @@ uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_
         if(key)
             KeyExpansion(key, key_size);
         else
-            throw "key_error";
+            throw new KeyException;
         switch(curr_mode)
         {
             case ECB: return ecb_decrypt(cipher_text, cipher_size, plain_size);
@@ -98,7 +98,7 @@ uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_
         }
     }
     else
-        throw "plain_text_error";
+        throw new CipherTextException;
 }
 
 uint8_t * Aes::cbc_encrypt(uint8_t plain_text[], size_t plain_size)
@@ -410,7 +410,7 @@ void Aes::KeyExpansion(uint8_t key[], size_t key_size)
             }
     }
     else
-        throw "key_size_error";
+        throw new KeyException;
 }
 
 uint32_t Aes::SubWord(uint32_t word)
