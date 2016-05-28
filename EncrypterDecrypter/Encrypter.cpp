@@ -1,12 +1,7 @@
 #include "Encrypter.h"
-#include <fstream>
-#include <cstring>
 #include "ui_Encrypter.h"
 #include "QFileDialog"
 #include "QMessageBox"
-#include "Rijndael/Rijndael.h"
-#include "Rijndael/aes.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,15 +11,56 @@ MainWindow::MainWindow(QWidget *parent) :
   //  ui->stackedWidget->setStyleSheet("border: 1px solid red");
    /* ui->ED_file->setIcon(QIcon(QPixmap("D:/programs/qt/proj/Encypter/icons/icons/button.png")));
     ui->ED_file->setIconSize(QSize(264, 32)); */
-    QPixmap pixmap(QDir::currentPath() + "/icons/button.png");
-       QIcon ButtonIcon(pixmap);
-       ui->ED_file->setIcon(ButtonIcon);
-       ui->ED_file->setIconSize(pixmap.rect().size());
-       ui->ED_Message->setIcon(ButtonIcon);
-       ui->ED_Message->setIconSize(pixmap.rect().size());
-    ui->centralWidget->setStyleSheet("background-color: #DCDCDC;");
+    ui->centralWidget->setStyleSheet("background-color:  #242a45;");
+    ui->frame->setStyleSheet("background-color:  #DCDCDC;");
+    ui->stackedWidget->setStyleSheet("background-color:  #DCDCDC;");
+    QPixmap pixmap(QDir::currentPath() + "/icons/EDcrF.png");
+    QIcon ButtonIcon(pixmap);
+    ui->ED_file->setIcon(ButtonIcon);
+    ui->ED_file->setIconSize(pixmap.rect().size());
     ui->ED_file->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap2(QDir::currentPath() + "/icons/EDcr.png");
+    QIcon ButtonIcon2(pixmap2);
+    ui->ED_Message->setIcon(ButtonIcon2);
+    ui->ED_Message->setIconSize(pixmap.rect().size());
     ui->ED_Message->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap3(QDir::currentPath() + "/icons/Set.png");
+    QIcon ButtonIcon3(pixmap3);
+    ui->settings_button->setIcon(ButtonIcon3);
+    ui->settings_button->setIconSize(pixmap.rect().size());
+    ui->settings_button->setStyleSheet("QPushButton{border: none;outline: none;}");
+    QPixmap pixmap4(QDir::currentPath() + "/icons/Ab.png");
+    QIcon  ButtonIcon4(pixmap4);
+    ui->about_button->setIcon(ButtonIcon4);
+    ui->about_button->setIconSize(pixmap.rect().size());
+    QPixmap pixmap5(QDir::currentPath() + "/icons/Hist.png");
+    QIcon  ButtonIcon5(pixmap5);
+    ui->history_button->setIcon(ButtonIcon5);
+    ui->history_button->setIconSize(pixmap.rect().size());
+    ui->history_button->setStyleSheet("QPushButton{border: none;outline: none;}");
+   // ui->tableWidget->setStyleSheet(tr("background-color: #FFFFFF;", "QScrollBar:horizontal {background: #DCDCDC}"));
+    QFile history("history.txt");
+    if(history.open(QIODevice::ReadOnly |QIODevice::Text))
+        {
+        int i = 0;
+            while(!history.atEnd())
+            {
+                QString str = history.readLine();
+                QStringList lst = str.split(" ");
+                int count = ui->tableWidget->rowCount( );
+                ui->tableWidget->insertRow(count); // добавление строк
+                for (int j=0;j<4;j++)
+                {
+                    QTableWidgetItem *item = new QTableWidgetItem(); // выделяем память под ячейку
+                    item->setText(lst.at(j).arg(i).arg(j)); // вставляем текст
+                    ui->tableWidget->setItem(i, j, item); // вставляем ячейку
+                  /*  ui->tableWidget->setItem(i, j, new QTableWidgetItem());
+                    (ui->tableWidget->item(i,j))->setText(lst.at(j)); */
+                }
+                i++;
+            }
+
+        }
 }
 
 MainWindow::~MainWindow()
@@ -49,30 +85,15 @@ void MainWindow::on_settings_button_clicked()
 }
 
 
-void MainWindow::on_about_button_clicked()
+void MainWindow::on_history_button_clicked()
 {
     ui->stackedWidget->setCurrentIndex(3);
 }
 
-static unsigned char * ReadBytesFromFile(const QString &filename, size_t &fsize)
-{
-    std::fstream f(filename.toStdString().c_str(), std::ios::in | std::ios::binary);
-    if(!f.is_open())
-        exit(EXIT_FAILURE);
-    f.seekg(0, std::ios_base::end);
-    fsize = f.tellg();
-    f.seekg(0, std::ios_base::beg);
-    uint8_t *file = new uint8_t[fsize];
-    f.read((char*)file, fsize);
-    return file;
-}
 
-void SaveBytesToFile(const QString &filename, const uint8_t *bytes, size_t size)
+void MainWindow::on_about_button_clicked()
 {
-    std::fstream f(filename.toStdString().c_str(), std::ios::out | std::ios::binary);
-    if(!f.is_open())
-        exit(EXIT_FAILURE);
-    f.write((char*)bytes, size);
+    ui->stackedWidget->setCurrentIndex(4);
 }
 
 
@@ -82,22 +103,29 @@ void MainWindow::on_pushButton_clicked()
 
     if(browse_win.exec())
     {
-        QStringList file_selected = browse_win.selectedFiles();
-        ui->lineEdit->setText(file_selected[0]);
-        size_t fsize;
-        uint8_t *file = ReadBytesFromFile(file_selected[0], fsize);
-        size_t key_size = 256;
-        uint8_t *cipher_key = new uint8_t[key_size / 8];
-        for(size_t i = 0; i < key_size / 8; ++i)
-            cipher_key[i] = (rand() & 0xff ^ rand() & 0xFF) << rand() % 7;
-        Aes aes;
-        /*uint8_t *input = new uint8_t[16];
-        uint8_t input_temp[16] = {0x00,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa,0xbb,0xcc,0xdd,0xee,0xff};
-        for(size_t i = 0; i < 16; ++i)
-            input[i] = input_temp[i];
-        uint8_t key[16] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};*/
-        uint8_t * cipher_text = aes.encrypt(file, fsize, cipher_key, key_size);
-        uint8_t * plain_text = aes.decrypt(cipher_text, (fsize - fsize % (16)) + 16, cipher_key, key_size);
-        SaveBytesToFile(file_selected[0], plain_text, fsize);
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->lineEdit->setText(file_selected[0]);
+    }
+}
+
+void MainWindow::on_SaveDir_button_clicked()
+{
+    QFileDialog browse_win;
+
+    if(browse_win.exec())
+    {
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->SaveDir_line->setText(file_selected[0]);
+    }
+}
+
+void MainWindow::on_Icon_button_clicked()
+{
+    QFileDialog browse_win;
+
+    if(browse_win.exec())
+    {
+    QStringList file_selected = browse_win.selectedFiles();
+    ui->Icon_line->setText(file_selected[0]);
     }
 }
