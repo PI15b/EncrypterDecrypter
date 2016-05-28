@@ -95,7 +95,7 @@ void MainWindow::on_pushButton_clicked()
     {
         QStringList file_selected = browse_win.selectedFiles();
         ui->lineEdit->setText(file_selected[0]);
-        Encrypt(Aes::CBC, Hash::MD5, file_selected[0], tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), Key::key128, tr("/home/fuxy/hash.md5"));
-        Decrypt(Aes::CBC, Hash::MD5, tr("/home/fuxy/plain.text"), tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), tr("/home/fuxy/hash.md5"));
+        Encrypt(Aes::CBC, Hash::SHA512, file_selected[0], tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), Key::key128, tr("/home/fuxy/hash.md5"));
+        Decrypt(Aes::CBC, Hash::SHA512, tr("/home/fuxy/plain.text"), tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), tr("/home/fuxy/hash.md5"));
     }
 }

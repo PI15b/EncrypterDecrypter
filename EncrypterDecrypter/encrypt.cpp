@@ -1,4 +1,5 @@
 #include <openssl/md5.h>
+#include <openssl/md4.h>
 #include <openssl/sha.h>
 #include <unistd.h>
 #include <fstream>
@@ -45,6 +46,11 @@ uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     size_t hash_size;
     switch(hash_alg)
     {
+        case Hash::MD4:
+        MD4(cipher_text, cipher_size, hash);
+        MD4(cipher_key, key_size / 8, key_hash);
+        hash_size = MD4_DIGEST_LENGTH;
+        break;
         case Hash::MD5:
         MD5(cipher_text, cipher_size, hash);
         MD5(cipher_key, key_size / 8, key_hash);
@@ -54,6 +60,21 @@ uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
         SHA1(cipher_text, cipher_size, hash);
         SHA1(cipher_key, key_size / 8, key_hash);
         hash_size = SHA_DIGEST_LENGTH;
+        break;
+        case Hash::SHA224:
+        SHA224(cipher_text, cipher_size, hash);
+        SHA224(cipher_key, key_size / 8, key_hash);
+        hash_size = SHA224_DIGEST_LENGTH;
+        break;
+        case Hash::SHA256:
+        SHA256(cipher_text, cipher_size, hash);
+        SHA256(cipher_key, key_size / 8, key_hash);
+        hash_size = SHA256_DIGEST_LENGTH;
+        break;
+        case Hash::SHA512:
+        SHA512(cipher_text, cipher_size, hash);
+        SHA512(cipher_key, key_size / 8, key_hash);
+        hash_size = SHA512_DIGEST_LENGTH;
         break;
     }
 
@@ -74,6 +95,11 @@ uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     unsigned char *cipher_hash, *key_hash;
     switch(hash_alg)
     {
+        case Hash::MD4:
+        MD4(cipher_text, cipher_size, cipher_hash);
+        MD4(cipher_key, key_size, key_hash);
+        hash_size = MD4_DIGEST_LENGTH;
+        break;
         case Hash::MD5:
         MD5(cipher_text, cipher_size, cipher_hash);
         MD5(cipher_key, key_size, key_hash);
@@ -83,6 +109,21 @@ uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
         SHA1(cipher_text, cipher_size, cipher_hash);
         SHA1(cipher_key, key_size, key_hash);
         hash_size = SHA_DIGEST_LENGTH;
+        break;
+        case Hash::SHA224:
+        SHA224(cipher_text, cipher_size, cipher_hash);
+        SHA224(cipher_key, key_size, key_hash);
+        hash_size = SHA224_DIGEST_LENGTH;
+        break;
+        case Hash::SHA256:
+        SHA256(cipher_text, cipher_size, cipher_hash);
+        SHA256(cipher_key, key_size, key_hash);
+        hash_size = SHA256_DIGEST_LENGTH;
+        break;
+        case Hash::SHA512:
+        SHA512(cipher_text, cipher_size, cipher_hash);
+        SHA512(cipher_key, key_size, key_hash);
+        hash_size = SHA512_DIGEST_LENGTH;
         break;
     }
     for(size_t i = 0; i < hash_size; ++i)

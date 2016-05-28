@@ -3,7 +3,7 @@
 #include <inttypes.h>
 #include "Rijndael/aes.h"
 #include <QString>
-enum class Hash{MD5, SHA1};
+enum class Hash{MD4, MD5, SHA1, SHA224, SHA256, SHA512};
 enum class Key{key128 = 128, key192 = 192, key256 = 256};
 
 //Encrypt procedure
