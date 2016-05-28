@@ -2,6 +2,8 @@
 #include "ui_Encrypter.h"
 #include "QFileDialog"
 #include "QMessageBox"
+#include <fstream>
+#include "encrypt.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -63,8 +65,7 @@ void MainWindow::on_about_button_clicked()
     ui->stackedWidget->setCurrentIndex(3);
 }
 
-
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_SaveDir_button_clicked()
 {
     QFileDialog browse_win;
 
@@ -75,24 +76,26 @@ void MainWindow::on_pushButton_clicked()
     }
 }
 
-void MainWindow::on_SaveDir_button_clicked()
-{
-    QFileDialog browse_win;
-
-    if(browse_win.exec())
-    {
-    QStringList file_selected = browse_win.selectedFiles();
-    ui->SaveDir_line->setText(file_selected[0]);
-    }
-}
-
 void MainWindow::on_Icon_button_clicked()
 {
     QFileDialog browse_win;
 
     if(browse_win.exec())
     {
-    QStringList file_selected = browse_win.selectedFiles();
-    ui->Icon_line->setText(file_selected[0]);
+        QStringList file_selected = browse_win.selectedFiles();
+        ui->lineEdit->setText(file_selected[0]);
+    }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QFileDialog browse_win;
+
+    if(browse_win.exec())
+    {
+        QStringList file_selected = browse_win.selectedFiles();
+        ui->lineEdit->setText(file_selected[0]);
+        Encrypt(Aes::CBC, Hash::MD5, file_selected[0], tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), Key::key128, tr("/home/fuxy/hash.md5"));
+        Decrypt(Aes::CBC, Hash::MD5, tr("/home/fuxy/plain.text"), tr("/home/fuxy/cipher.text"), tr("/home/fuxy/cipher.key"), tr("/home/fuxy/hash.md5"));
     }
 }

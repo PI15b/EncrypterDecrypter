@@ -70,15 +70,17 @@ uint8_t * Aes::encrypt(uint8_t plain_text[], size_t plain_size, uint8_t key[], s
         switch(curr_mode)
         {
             case ECB: return ecb_encrypt(plain_text, plain_size);
-            case CBC: break;
-            case CFB: break;
+            case CBC: return cbc_encrypt(plain_text, plain_size);
+            case CFB: return cfb_encrypt(plain_text, plain_size);
+            case OFB: return ofb_encrypt(plain_text, plain_size);
+            case PCBC: return pcbc_encrypt(plain_text, plain_size);
         }
     }
     else
         throw "plain_text_error";
 }
 
-uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, uint8_t key[], size_t key_size)
+uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size, uint8_t key[], size_t key_size)
 {
     if(cipher_text)
     {
@@ -88,13 +90,213 @@ uint8_t * Aes::decrypt(uint8_t cipher_text[], size_t cipher_size, uint8_t key[],
             throw "key_error";
         switch(curr_mode)
         {
-            case ECB: ecb_decrypt(cipher_text, cipher_size); break;
-            case CBC: break;
-            case CFB: break;
+            case ECB: return ecb_decrypt(cipher_text, cipher_size, plain_size);
+            case CBC: return cbc_decrypt(cipher_text, cipher_size, plain_size);
+            case CFB: return cfb_decrypt(cipher_text, cipher_size, plain_size);
+            case OFB: return ofb_decrypt(cipher_text, cipher_size, plain_size);
+            case PCBC: return pcbc_decrypt(cipher_text, cipher_size, plain_size);
         }
     }
     else
         throw "plain_text_error";
+}
+
+uint8_t * Aes::cbc_encrypt(uint8_t plain_text[], size_t plain_size)
+{
+    uint8_t *cipher_text = new uint8_t[plain_size + 4*Nb];
+    uint8_t *init_vector = GenInitVector();
+    for(size_t i = 0; i < plain_size; i+=4*Nb)
+    {
+        memcpy(State, plain_text + i, 4*Nb);
+        if (i > 0)
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                State[j] ^= cipher_text[j + i - 4*Nb];
+        }
+        else
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                State[j] ^= init_vector[j];
+        }
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        memcpy(cipher_text + i, State, sizeof(State));
+    }
+    memcpy(cipher_text + plain_size, init_vector, 4*Nb);
+    return cipher_text;
+}
+
+uint8_t * Aes::cbc_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size)
+{
+    uint8_t *plain_text = new uint8_t[cipher_size - 4*Nb];
+    uint8_t *init_vector = new uint8_t[4*Nb];
+    memcpy(init_vector, cipher_text + (cipher_size - 4*Nb), 4*Nb);
+    for(size_t i = 0; i < cipher_size - 4*Nb; i+=4*Nb)
+    {
+        memcpy(State, cipher_text + i, 4*Nb);
+        AddRoundKey(Nr * Nb);
+        for(size_t r = Nr - 1; r > 0; --r)
+            InvRound(r);
+        InvFinalRound();
+        if (i > 0)
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                plain_text[j + i] = State[j] ^ cipher_text[j + i - 4*Nb];
+        }
+        else
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                plain_text[j + i] = State[j] ^ init_vector[j];
+        }
+    }
+    plain_text = UnPadPlainText(plain_text, cipher_size - 4*Nb, plain_size);
+    return plain_text;
+}
+
+uint8_t * Aes::pcbc_encrypt(uint8_t plain_text[], size_t plain_size)
+{
+    uint8_t *cipher_text = new uint8_t[plain_size + 4*Nb];
+    uint8_t *init_vector = GenInitVector();
+    for(size_t i = 0; i < plain_size; i+=4*Nb)
+    {
+        memcpy(State, plain_text + i, 4*Nb);
+        if (i > 0)
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                State[j] ^= plain_text[j + i - 4*Nb] ^ cipher_text[j + i - 4*Nb];
+        }
+        else
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                State[j] ^= init_vector[j];
+        }
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        memcpy(cipher_text + i, State, sizeof(State));
+    }
+    memcpy(cipher_text + plain_size, init_vector, 4*Nb);
+    return cipher_text;
+}
+
+uint8_t * Aes::pcbc_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size)
+{
+    uint8_t *plain_text = new uint8_t[cipher_size - 4*Nb];
+    uint8_t *init_vector = new uint8_t[4*Nb];
+    memcpy(init_vector, cipher_text + (cipher_size - 4*Nb), 4*Nb);
+    for(size_t i = 0; i < cipher_size - 4*Nb; i+=4*Nb)
+    {
+        memcpy(State, cipher_text + i, 4*Nb);
+        AddRoundKey(Nr * Nb);
+        for(size_t r = Nr - 1; r > 0; --r)
+            InvRound(r);
+        InvFinalRound();
+        if (i > 0)
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                plain_text[j + i] = State[j] ^ plain_text[j + i - 4*Nb] ^ cipher_text[j + i - 4*Nb];
+        }
+        else
+        {
+            for(size_t j = 0; j < 4*Nb; ++j)
+                plain_text[j + i] = State[j] ^ init_vector[j];
+        }
+    }
+    plain_text = UnPadPlainText(plain_text, cipher_size - 4*Nb, plain_size);
+    return plain_text;
+}
+
+uint8_t * Aes::cfb_encrypt(uint8_t plain_text[], size_t plain_size)
+{
+    uint8_t *cipher_text = new uint8_t[plain_size + 4*Nb];
+    uint8_t *init_vector = GenInitVector();
+    for(size_t i = 0; i < plain_size; i+=4*Nb)
+    {
+        if (i > 0)
+            memcpy(State, cipher_text + i - 4*Nb, 4*Nb);
+        else
+            memcpy(State, init_vector, 4*Nb);
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        for(size_t j = 0; j < 4*Nb; ++j)
+            cipher_text[j + i] = State[j] ^ plain_text[j + i];
+    }
+    memcpy(cipher_text + plain_size, init_vector, 4*Nb);
+    return cipher_text;
+}
+
+uint8_t * Aes::cfb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size)
+{
+    uint8_t *plain_text = new uint8_t[cipher_size - 4*Nb];
+    uint8_t *init_vector = new uint8_t[4*Nb];
+    memcpy(init_vector, cipher_text + (cipher_size - 4*Nb), 4*Nb);
+    for(size_t i = 0; i < cipher_size - 4*Nb; i+=4*Nb)
+    {
+        if (i > 0)
+            memcpy(State, cipher_text + i - 4*Nb, 4*Nb);
+        else
+            memcpy(State, init_vector, 4*Nb);
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        for(size_t j = 0; j < 4*Nb; ++j)
+            plain_text[j + i] = State[j] ^ cipher_text[j + i];
+    }
+    plain_text = UnPadPlainText(plain_text, cipher_size - 4*Nb, plain_size);
+    return plain_text;
+}
+
+uint8_t * Aes::ofb_encrypt(uint8_t plain_text[], size_t plain_size)
+{
+    uint8_t *cipher_text = new uint8_t[plain_size + 4*Nb];
+    uint8_t *init_vector = GenInitVector();
+    for(size_t i = 0; i < plain_size; i+=4*Nb)
+    {
+        if (i == 0)
+            memcpy(State, init_vector, 4*Nb);
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        for(size_t j = 0; j < 4*Nb; ++j)
+            cipher_text[j + i] = State[j] ^ plain_text[j + i];
+    }
+    memcpy(cipher_text + plain_size, init_vector, 4*Nb);
+    return cipher_text;
+}
+
+uint8_t * Aes::ofb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size)
+{
+    uint8_t *plain_text = new uint8_t[cipher_size - 4*Nb];
+    uint8_t *init_vector = new uint8_t[4*Nb];
+    memcpy(init_vector, cipher_text + (cipher_size - 4*Nb), 4*Nb);
+    for(size_t i = 0; i < cipher_size - 4*Nb; i+=4*Nb)
+    {
+        if (i == 0)
+            memcpy(State, init_vector, 4*Nb);
+        AddRoundKey(0);
+        for(size_t r = 1; r < Nr; ++r)
+            Round(r);
+        FinalRound();
+        for(size_t j = 0; j < 4*Nb; ++j)
+            plain_text[j + i] = State[j] ^ cipher_text[j + i];
+    }
+    plain_text = UnPadPlainText(plain_text, cipher_size - 4*Nb, plain_size);
+    return plain_text;
+}
+
+uint8_t * Aes::GenInitVector()
+{
+    uint8_t *init_vector = new uint8_t[4*Nb];
+    for(size_t i = 0; i < 4*Nb; ++i)
+        init_vector[i] = rand() & 0xff;
+    return init_vector;
 }
 
 size_t Aes::PadPlainText(uint8_t *&plain_text, size_t plain_size)
@@ -111,9 +313,9 @@ size_t Aes::PadPlainText(uint8_t *&plain_text, size_t plain_size)
     return pad_size;
 }
 
-uint8_t * Aes::UnPadPlainText(uint8_t plain_text[], size_t pad_size)
+uint8_t * Aes::UnPadPlainText(uint8_t plain_text[], size_t pad_size, size_t &plain_size)
 {
-    size_t plain_size = pad_size - plain_text[pad_size - 1];
+    plain_size = pad_size - plain_text[pad_size - 1];
     uint8_t *correct_plain_text = new uint8_t[plain_size];
     memcpy(correct_plain_text, plain_text, plain_size);
     return correct_plain_text;
@@ -134,7 +336,7 @@ uint8_t * Aes::ecb_encrypt(uint8_t plain_text[], size_t plain_size)
     return cipher_text;
 }
 
-uint8_t * Aes::ecb_decrypt(uint8_t cipher_text[], size_t cipher_size)
+uint8_t * Aes::ecb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size)
 {
     uint8_t *plain_text = new uint8_t[cipher_size];
     for(size_t i = 0; i < cipher_size; i+=4*Nb)
@@ -146,7 +348,7 @@ uint8_t * Aes::ecb_decrypt(uint8_t cipher_text[], size_t cipher_size)
         InvFinalRound();
         memcpy(plain_text + i, State, sizeof(State));
     }
-    plain_text = UnPadPlainText(plain_text, cipher_size);
+    plain_text = UnPadPlainText(plain_text, cipher_size, plain_size);
     return plain_text;
 }
 

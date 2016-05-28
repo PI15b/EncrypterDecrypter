@@ -10,17 +10,25 @@ public:
     // Encrypt procedure
     uint8_t * encrypt(uint8_t plain_text[], size_t plain_size, uint8_t key[], size_t key_size);
     // Decrypt procedure
-    uint8_t * decrypt(uint8_t cipher_text[], size_t cipher_size, uint8_t key[], size_t key_size);
-    enum mode{ECB, CBC, CFB};
+    uint8_t * decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size, uint8_t key[], size_t key_size);
+    enum mode{ECB, CBC, PCBC, CFB, OFB};
     enum {Nb = 4};
 private:
     size_t Nk, Nr;
     unsigned int curr_mode;
     uint8_t State[4*Nb];
     uint32_t *w; // key schedule
-    // Encrypt procedutes for different block cipher modes
+    // Encrypt procedures for different block cipher modes
     uint8_t * ecb_encrypt(uint8_t plain_text[], size_t plain_size);
-    uint8_t * ecb_decrypt(uint8_t cipher_text[], size_t cipher_size);
+    uint8_t * ecb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size);
+    uint8_t * cbc_encrypt(uint8_t plain_text[], size_t plain_size);
+    uint8_t * cbc_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size);
+    uint8_t * pcbc_encrypt(uint8_t plain_text[], size_t plain_size);
+    uint8_t * pcbc_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size);
+    uint8_t * cfb_encrypt(uint8_t plain_text[], size_t plain_size);
+    uint8_t * cfb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size);
+    uint8_t * ofb_encrypt(uint8_t plain_text[], size_t plain_size);
+    uint8_t * ofb_decrypt(uint8_t cipher_text[], size_t cipher_size, size_t &plain_size);
     // Aes procedures
     void AddRoundKey(size_t round);
     /* void InvMixColumns();
@@ -41,7 +49,9 @@ private:
     // Pad procedure ISO 10126
     size_t PadPlainText(uint8_t *&plain_text, size_t plain_size);
     // UnPad procedure
-    uint8_t * UnPadPlainText(uint8_t plain_text[], size_t pad_size);
+    uint8_t * UnPadPlainText(uint8_t plain_text[], size_t pad_size, size_t &plain_size);
+    // Initialization vector generator
+    uint8_t * GenInitVector();
 };
 
 #endif // AES_H
