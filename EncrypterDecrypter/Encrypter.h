@@ -48,9 +48,14 @@ private slots:
 
     void on_textEdit_selectionChanged();
 
+    void on_SaveDir_line_textChanged(const QString &arg1);
+
+    void on_SaveDir_line_editingFinished();
+
 private:
     Ui::MainWindow *ui;
     Settings *settings;
+    QString temp;
 };
 
 #endif // ENCRYPTER_H

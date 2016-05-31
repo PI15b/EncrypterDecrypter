@@ -736,7 +736,7 @@ p, li { white-space: pre-wrap; }
          <x>0</x>
          <y>10</y>
          <width>381</width>
-         <height>259</height>
+         <height>262</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">

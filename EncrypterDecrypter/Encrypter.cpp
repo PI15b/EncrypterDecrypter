@@ -123,11 +123,12 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::on_SaveDir_button_clicked()
 {
     QFileDialog browse_win;
-
+    browse_win.setDirectory(ui->SaveDir_line->text());
+    browse_win.setFileMode(QFileDialog::Directory);
     if(browse_win.exec())
     {
-    QStringList file_selected = browse_win.selectedFiles();
-    ui->SaveDir_line->setText(file_selected[0]);
+        QStringList file_selected = browse_win.selectedFiles();
+        ui->SaveDir_line->setText(file_selected[0]);
     }
 }
 
@@ -144,7 +145,8 @@ void MainWindow::on_Icon_button_clicked()
 
 void MainWindow::on_lineEdit_3_selectionChanged()
 {
-    ui->lineEdit_3->setText("");
+    temp = ui->lineEdit_3->text();
+    ui->lineEdit_3->clear();
 }
 
 void MainWindow::on_lineEdit_2_selectionChanged()
@@ -169,7 +171,8 @@ void MainWindow::on_lineEdit_5_selectionChanged()
 
 void MainWindow::on_SaveDir_line_selectionChanged()
 {
-     ui->SaveDir_line->setText("");
+    ui->SaveDir_line->setModified(true);
+    ui->SaveDir_line->clear();
 }
 
 void MainWindow::on_lineEdit_selectionChanged()

@@ -4,12 +4,12 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    QCoreApplication::setOrganizationName("Team");
-    QCoreApplication::setApplicationName("EncrypterDecrypter");
+    //QCoreApplication::setOrganizationName("Team");
+    //QCoreApplication::setApplicationName("EncrypterDecrypter");
     MainWindow w;
-    w.loadSettings();
+    //w.loadSettings();
     w.setWindowTitle("Encrypter/Decrypter");
     w.show();
-    w.saveSettings();
+    //w.saveSettings();
     return a.exec();
 }
