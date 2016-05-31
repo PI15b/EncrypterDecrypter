@@ -2,6 +2,7 @@
 #include "ui_Encrypter.h"
 #include "QFileDialog"
 #include "QMessageBox"
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -60,6 +61,18 @@ MainWindow::MainWindow(QWidget *parent) :
                 i++;
             }
         }
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings conf;
+    settings->setCipherPath(conf.value("Encrypter/CipherPath").toString());
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings conf;
+    conf.setValue("Encrypter/CipherPath", settings->getCipherPath());
 }
 
 MainWindow::~MainWindow()
