@@ -3,6 +3,8 @@
 #include "QFileDialog"
 #include "QMessageBox"
 #include <QSettings>
+#include "encrypt.h"
+#include <QMetaEnum>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -72,12 +74,21 @@ void MainWindow::loadSettings()
 {
     QSettings conf("config.ini", QSettings::IniFormat);
     settings->setCipherPath(conf.value("encrypter/cipherpath").toString());
+    settings->setCipherMode(conf.value("encrypter/ciphermode").toString());
+    settings->setHash(conf.value("encrypter/hash").toString());
+    settings->setKey(conf.value("encrypter/keysize").toString());
+    settings->setAuthor(conf.value("assembl/author").toString());
+    settings->setDescr(conf.value("assembl/descr").toString());
+    settings->setFilename(conf.value("assembl/filename").toString());
 }
 
 void MainWindow::saveSettings()
 {
     QSettings conf("config.ini", QSettings::IniFormat);
     conf.setValue("encrypter/cipherpath", settings->getCipherPath());
+    conf.setValue("assembl/author", settings->getAuthor());
+    conf.setValue("assembl/descr", settings->getDescr());
+    conf.setValue("assembl/filename", settings->getFilename());
 }
 
 MainWindow::~MainWindow()
@@ -198,4 +209,10 @@ void MainWindow::on_save_button_clicked()
 void MainWindow::on_SaveDir_line_returnPressed()
 {
     settings->setCipherPath(ui->SaveDir_line->text());
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    Encrypt(settings->getCipherModeEnum(), settings->getHashEnum(), ui->lineEdit->text(), settings->getCipherPath() + "/" + settings->getFilename(),
+            settings->getCipherPath() + "/" + settings->getFilename() + ".key", settings->getKeyEnum(), settings->getCipherPath() + "/" + settings->getFilename() + ".hash");
 }

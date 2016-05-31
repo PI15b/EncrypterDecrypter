@@ -53,6 +53,8 @@ private slots:
 
     void on_SaveDir_line_returnPressed();
 
+    void on_pushButton_2_clicked();
+
 private:
     Ui::MainWindow *ui;
     Settings *settings;
