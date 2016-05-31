@@ -15,7 +15,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
         Encrypter.cpp
 
-HEADERS  += Encrypter.h
+HEADERS  += Encrypter.h \
+    settings.h
 
 FORMS    += Encrypter.ui
 

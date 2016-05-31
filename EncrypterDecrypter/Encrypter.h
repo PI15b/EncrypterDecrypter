@@ -2,6 +2,7 @@
 #define ENCRYPTER_H
 
 #include <QMainWindow>
+#include "settings.h"
 
 namespace Ui {
 class MainWindow;
@@ -13,6 +14,8 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void loadSettings();
+    void saveSettings();
     ~MainWindow();
 
 private slots:
@@ -47,6 +50,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    Settings *settings;
 };
 
 #endif // ENCRYPTER_H
