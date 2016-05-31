@@ -16,6 +16,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     void loadSettings();
     void saveSettings();
+    void init();
     ~MainWindow();
 
 private slots:
@@ -48,14 +49,13 @@ private slots:
 
     void on_textEdit_selectionChanged();
 
-    void on_SaveDir_line_textChanged(const QString &arg1);
+    void on_save_button_clicked();
 
-    void on_SaveDir_line_editingFinished();
+    void on_SaveDir_line_returnPressed();
 
 private:
     Ui::MainWindow *ui;
     Settings *settings;
-    QString temp;
 };
 
 #endif // ENCRYPTER_H

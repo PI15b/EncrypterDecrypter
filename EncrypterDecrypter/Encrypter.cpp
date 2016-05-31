@@ -6,7 +6,7 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow), settings(new Settings)
 {
     ui->setupUi(this);
   //  ui->stackedWidget->setStyleSheet("border: 1px solid red");
@@ -63,16 +63,21 @@ MainWindow::MainWindow(QWidget *parent) :
         }
 }
 
+void MainWindow::init()
+{
+    ui->SaveDir_line->setText(settings->getCipherPath());
+}
+
 void MainWindow::loadSettings()
 {
-    QSettings conf;
-    settings->setCipherPath(conf.value("Encrypter/CipherPath").toString());
+    QSettings conf("config.ini", QSettings::IniFormat);
+    settings->setCipherPath(conf.value("encrypter/cipherpath").toString());
 }
 
 void MainWindow::saveSettings()
 {
-    QSettings conf;
-    conf.setValue("Encrypter/CipherPath", settings->getCipherPath());
+    QSettings conf("config.ini", QSettings::IniFormat);
+    conf.setValue("encrypter/cipherpath", settings->getCipherPath());
 }
 
 MainWindow::~MainWindow()
@@ -129,6 +134,7 @@ void MainWindow::on_SaveDir_button_clicked()
     {
         QStringList file_selected = browse_win.selectedFiles();
         ui->SaveDir_line->setText(file_selected[0]);
+        settings->setCipherPath(file_selected[0]);
     }
 }
 
@@ -145,7 +151,6 @@ void MainWindow::on_Icon_button_clicked()
 
 void MainWindow::on_lineEdit_3_selectionChanged()
 {
-    temp = ui->lineEdit_3->text();
     ui->lineEdit_3->clear();
 }
 
@@ -183,4 +188,14 @@ void MainWindow::on_lineEdit_selectionChanged()
 void MainWindow::on_textEdit_selectionChanged()
 {
     ui->textEdit->setText("");
+}
+
+void MainWindow::on_save_button_clicked()
+{
+    saveSettings();
+}
+
+void MainWindow::on_SaveDir_line_returnPressed()
+{
+    settings->setCipherPath(ui->SaveDir_line->text());
 }
