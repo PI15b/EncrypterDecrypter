@@ -77,7 +77,7 @@
        <x>10</x>
        <y>10</y>
        <width>381</width>
-       <height>271</height>
+       <height>301</height>
       </rect>
      </property>
      <property name="autoFillBackground">
@@ -87,7 +87,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="page">
       <property name="palette">
@@ -736,7 +736,7 @@ p, li { white-space: pre-wrap; }
          <x>0</x>
          <y>10</y>
          <width>381</width>
-         <height>262</height>
+         <height>291</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -862,6 +862,30 @@ p, li { white-space: pre-wrap; }
             </property>
             <property name="value">
              <number>100</number>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Путь к заш. файлам</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="3">
+           <widget class="QLineEdit" name="lineEdit_4">
+            <property name="styleSheet">
+             <string notr="true">background-color: #FFFFFF</string>
+            </property>
+            <property name="text">
+             <string>Укажите путь...</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="5">
+           <widget class="QPushButton" name="pushButton_6">
+            <property name="text">
+             <string>Обзор</string>
             </property>
            </widget>
           </item>
