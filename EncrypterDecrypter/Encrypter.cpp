@@ -59,7 +59,6 @@ MainWindow::MainWindow(QWidget *parent) :
                 }
                 i++;
             }
-
         }
 }
 
@@ -128,4 +127,44 @@ void MainWindow::on_Icon_button_clicked()
     QStringList file_selected = browse_win.selectedFiles();
     ui->Icon_line->setText(file_selected[0]);
     }
+}
+
+void MainWindow::on_lineEdit_3_selectionChanged()
+{
+    ui->lineEdit_3->setText("");
+}
+
+void MainWindow::on_lineEdit_2_selectionChanged()
+{
+    ui->lineEdit_2->setText("");
+}
+
+void MainWindow::on_textEdit_2_selectionChanged()
+{
+    ui->textEdit_2->setText("");
+}
+
+void MainWindow::on_Icon_line_selectionChanged()
+{
+    ui->Icon_line->setText("");
+}
+
+void MainWindow::on_lineEdit_5_selectionChanged()
+{
+    ui->lineEdit_5->setText("");
+}
+
+void MainWindow::on_SaveDir_line_selectionChanged()
+{
+     ui->SaveDir_line->setText("");
+}
+
+void MainWindow::on_lineEdit_selectionChanged()
+{
+    ui->lineEdit->setText("");
+}
+
+void MainWindow::on_textEdit_selectionChanged()
+{
+    ui->textEdit->setText("");
 }

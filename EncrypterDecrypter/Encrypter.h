@@ -29,6 +29,22 @@ private slots:
 
     void on_history_button_clicked();
 
+    void on_lineEdit_3_selectionChanged();
+
+    void on_lineEdit_2_selectionChanged();
+
+    void on_textEdit_2_selectionChanged();
+
+    void on_Icon_line_selectionChanged();
+
+    void on_lineEdit_5_selectionChanged();
+
+    void on_SaveDir_line_selectionChanged();
+
+    void on_lineEdit_selectionChanged();
+
+    void on_textEdit_selectionChanged();
+
 private:
     Ui::MainWindow *ui;
 };
