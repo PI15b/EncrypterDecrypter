@@ -5,6 +5,7 @@
 #include <QSettings>
 #include "encrypt.h"
 #include <QMetaEnum>
+#include <openssl/aes.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -213,6 +214,22 @@ void MainWindow::on_SaveDir_line_returnPressed()
 
 void MainWindow::on_pushButton_2_clicked()
 {
-    Encrypt(settings->getCipherModeEnum(), settings->getHashEnum(), ui->lineEdit->text(), settings->getCipherPath() + "/" + settings->getFilename(),
-            settings->getCipherPath() + "/" + settings->getFilename() + ".key", settings->getKeyEnum(), settings->getCipherPath() + "/" + settings->getFilename() + ".hash");
+    QString temp = settings->getCipherPath() + "/" + settings->getFilename();
+    QString temp1 = temp + ".key", temp2 = temp + ".hash";
+    //Encrypt(Aes::CBC, Hash::MD5, "C:/test/1.test", "C:/test/cipher.text", "C:/test/cipher.key", Key::key128, "C:/test/cipher.hash");
+    Encrypt(static_cast<Aes::mode>(settings->getCipherModeEnum()), static_cast<Hash>(settings->getHashEnum()), ui->lineEdit->text(), temp,
+            temp1, static_cast<Key>(settings->getKeyEnum()), temp2);
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    QStringList temp = ui->lineEdit->text().split("/");
+    //Decrypt(Aes::CBC, Hash::MD5, "C:/test/1.test", "C:/test/cipher.text", "C:/test/cipher.key", "C:/test/cipher.hash");
+    Decrypt(static_cast<Aes::mode>(settings->getCipherModeEnum()), static_cast<Hash>(settings->getHashEnum()), settings->getCipherPath() + "/" + "plain.text", ui->lineEdit->text(),
+            settings->getCipherPath() + "/" + temp.last() + ".key", settings->getCipherPath() + "/" + temp.last() + ".hash");
+}
+
+void MainWindow::on_lineEdit_2_returnPressed()
+{
+    settings->setFilename(ui->lineEdit_2->text());
 }

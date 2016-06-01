@@ -26,7 +26,7 @@ void SaveBytesToFile(const QString &filename, const uint8_t *bytes, size_t size)
     f.write((char*)bytes, size);
 }
 
-uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, const QString &cipher_dir, const QString &key_dir, Key key_type, const QString &hash_dir)
+void Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, const QString &cipher_dir, const QString &key_dir, Key key_type, const QString &hash_dir)
 {
     size_t plain_size, key_size = static_cast<size_t>(key_type);
     uint8_t * plain_text = ReadBytesFromFile(plain_dir, plain_size);
@@ -47,31 +47,43 @@ uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     switch(hash_alg)
     {
         case Hash::MD4:
+        hash = new unsigned char [MD4_DIGEST_LENGTH];
+        key_hash = new unsigned char [MD4_DIGEST_LENGTH];
         MD4(cipher_text, cipher_size, hash);
         MD4(cipher_key, key_size / 8, key_hash);
         hash_size = MD4_DIGEST_LENGTH;
         break;
         case Hash::MD5:
+        hash = new unsigned char [MD5_DIGEST_LENGTH];
+        key_hash = new unsigned char [MD5_DIGEST_LENGTH];
         MD5(cipher_text, cipher_size, hash);
         MD5(cipher_key, key_size / 8, key_hash);
         hash_size = MD5_DIGEST_LENGTH;
         break;
         case Hash::SHA1:
+        hash = new unsigned char [SHA_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA_DIGEST_LENGTH];
         SHA1(cipher_text, cipher_size, hash);
         SHA1(cipher_key, key_size / 8, key_hash);
         hash_size = SHA_DIGEST_LENGTH;
         break;
         case Hash::SHA224:
+        hash = new unsigned char [SHA224_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA224_DIGEST_LENGTH];
         SHA224(cipher_text, cipher_size, hash);
         SHA224(cipher_key, key_size / 8, key_hash);
         hash_size = SHA224_DIGEST_LENGTH;
         break;
         case Hash::SHA256:
+        hash = new unsigned char [SHA256_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA256_DIGEST_LENGTH];
         SHA256(cipher_text, cipher_size, hash);
         SHA256(cipher_key, key_size / 8, key_hash);
         hash_size = SHA256_DIGEST_LENGTH;
         break;
         case Hash::SHA512:
+        hash = new unsigned char [SHA512_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA512_DIGEST_LENGTH];
         SHA512(cipher_text, cipher_size, hash);
         SHA512(cipher_key, key_size / 8, key_hash);
         hash_size = SHA512_DIGEST_LENGTH;
@@ -84,9 +96,14 @@ uint8_t * Encrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     SaveBytesToFile(cipher_dir, cipher_text, cipher_size);
     SaveBytesToFile(key_dir, cipher_key, key_size / 8);
     SaveBytesToFile(hash_dir, hash, hash_size);
+    delete []cipher_key;
+    delete []plain_text;
+    delete []cipher_text;
+    delete []hash;
+    delete []key_hash;
 }
 
-uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, const QString &cipher_dir, const QString &key_dir, const QString &hash_dir)
+void Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, const QString &cipher_dir, const QString &key_dir, const QString &hash_dir)
 {
     size_t cipher_size, key_size, hash_size;
     uint8_t * cipher_text = ReadBytesFromFile(cipher_dir, cipher_size);
@@ -96,31 +113,43 @@ uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     switch(hash_alg)
     {
         case Hash::MD4:
+        cipher_hash = new unsigned char [MD4_DIGEST_LENGTH];
+        key_hash = new unsigned char [MD4_DIGEST_LENGTH];
         MD4(cipher_text, cipher_size, cipher_hash);
         MD4(cipher_key, key_size, key_hash);
         hash_size = MD4_DIGEST_LENGTH;
         break;
         case Hash::MD5:
+        cipher_hash = new unsigned char [MD5_DIGEST_LENGTH];
+        key_hash = new unsigned char [MD5_DIGEST_LENGTH];
         MD5(cipher_text, cipher_size, cipher_hash);
         MD5(cipher_key, key_size, key_hash);
         hash_size = MD5_DIGEST_LENGTH;
         break;
         case Hash::SHA1:
+        cipher_hash = new unsigned char [SHA_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA_DIGEST_LENGTH];
         SHA1(cipher_text, cipher_size, cipher_hash);
         SHA1(cipher_key, key_size, key_hash);
         hash_size = SHA_DIGEST_LENGTH;
         break;
         case Hash::SHA224:
+        cipher_hash = new unsigned char [SHA224_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA224_DIGEST_LENGTH];
         SHA224(cipher_text, cipher_size, cipher_hash);
         SHA224(cipher_key, key_size, key_hash);
         hash_size = SHA224_DIGEST_LENGTH;
         break;
         case Hash::SHA256:
+        cipher_hash = new unsigned char [SHA256_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA256_DIGEST_LENGTH];
         SHA256(cipher_text, cipher_size, cipher_hash);
         SHA256(cipher_key, key_size, key_hash);
         hash_size = SHA256_DIGEST_LENGTH;
         break;
         case Hash::SHA512:
+        cipher_hash = new unsigned char [SHA512_DIGEST_LENGTH];
+        key_hash = new unsigned char [SHA512_DIGEST_LENGTH];
         SHA512(cipher_text, cipher_size, cipher_hash);
         SHA512(cipher_key, key_size, key_hash);
         hash_size = SHA512_DIGEST_LENGTH;
@@ -134,4 +163,9 @@ uint8_t * Decrypt(unsigned int mode, Hash hash_alg, const QString &plain_dir, co
     Aes aes(mode);
     uint8_t * plain_text = aes.decrypt(cipher_text, cipher_size, plain_size, cipher_key, key_size * 8);
     SaveBytesToFile(plain_dir, plain_text, plain_size);
+    delete []cipher_key;
+    delete []plain_text;
+    delete []cipher_text;
+    delete []hash;
+    delete []key_hash;
 }
